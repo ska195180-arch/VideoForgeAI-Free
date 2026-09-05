@@ -1,0 +1,43 @@
+name: Build VideoForge AI APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract project ZIP
+        run: |
+          mkdir -p project
+          unzip -q VideoForgeAI-Free-APK-v6-GitHub-Build.zip -d project
+          echo "Project extracted"
+          find project -maxdepth 2 -type f | head -50
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Build APK
+        working-directory: project/VideoForgeAI-Free-APK-v6-GitHub-Build
+        run: gradle assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: VideoForgeAI-Free-debug
+          path: project/VideoForgeAI-Free-APK-v6-GitHub-Build/app/build/outputs/apk/debug/*.apk
